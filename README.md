@@ -5,4 +5,4 @@ Features
 - records their exif information at imgur
 - extracts the picture geotag
 - allows adding comments for each pic
-- generates SMP forum markup with the information above
+- generates BBCode (for e.g. SMP forums) with the information above
