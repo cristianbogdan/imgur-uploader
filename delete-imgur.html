@@ -1,0 +1,19 @@
+<script language=javascript>
+  function selectElementContents(el) {
+    var range = document.createRange();
+    range.selectNodeContents(el);
+    var sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+  }
+</script>  
+<input id="box" type=text onchange="getElementById('snp').innerHTML='';for(var i=this.value.length-1; i>=0; i--)getElementById('snp').innerHTML+=this.value[i];" autofocus>
+<button type="button" id="btn" onClick="selectElementContents(getElementById('command')); console.log(execCommand('copy')); getElementById('box').select()" >Copy</button>
+<!--button type="button" onClick=" console.log('here');getElementById('box').focus(); console.log(execCommand('paste')); selectElementContents(getElementById('command')); console.log(execCommand('copy')); this.focus()" >Paste an Copy</button-->
+<br>
+<pre rows=4 cols=60 id="command">
+curl --request DELETE \
+--url 'https://api.imgur.com/3/image/<span id="snp"></span>' \
+--header 'authorization: Client-ID 59c68e102e4b4fc'
+
+</pre>
