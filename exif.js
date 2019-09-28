@@ -144,6 +144,7 @@ function loaded(){
 //  --header 'authorization: Client-ID 59c68e102e4b4fc'
 }
 
+
 const exifExample={
 "Orientation":3,
 "XResolution":72,
@@ -192,6 +193,7 @@ const exifExample={
 "thumbnail":1
 };
 
+// code from https://gist.github.com/Arun-Salesforce/9124de8ed060fd301035b0d16be73219
 (function() {
 
     var debug = false;
