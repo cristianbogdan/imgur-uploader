@@ -12,6 +12,8 @@ document.body.insertAdjacentHTML
 ( 'afterbegin',
   `<a href="http://proinfrastructura.ro"><img id="api" src="http://proinfrastructura.ro/images/logos/api/logo_api_portrait_big.png" width="50" style="float:right"/></a>
 Alege imaginile de incarcat la imgur: <input type="file" multiple id="filez">
+  <br>
+  <label><input type="checkbox" id="ccbysa" value="ccbysa">Sunt de acord cu folosirea fotografiilor mele pe Wikipedia (imaginile vor fi publicate sub licența <a rel="license" href="https://creativecommons.org/licenses/by-sa/4.0/">Creative Commons Atribuire-Distribuire în Condiții identice 4.0</a>)</label>
   <hr>
   Optional, o descriere pt fiecare poza:
   <hr>
