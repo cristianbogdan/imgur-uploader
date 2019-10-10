@@ -34,7 +34,7 @@ function loaded(){
 	for (var x = 0; x < filez.files.length; x++) {
 	    //add to list
 	    photoz.innerHTML+= '<table border=0 cellpadding=0><tr valign=top><td>'+filez.files[x].name+' </td><td><textarea lang="ro" spellcheck="true" rows=2 cols=80 oninput="description(event)" id="inp_'+idx+'"></textarea><td height="50"><span id="f_'+idx+'"></span></td></tr></table><hr>';
-	    document.getElementById('f_'+idx).innerHTML= "<img id='searchimg' class='loadingimg' src='http://standup.csc.kth.se/maps/images/loading.gif'/>";
+	    document.getElementById('f_'+idx).innerHTML= "<img id='searchimg' class='loadingimg' src='"+SCRIPT_ROOT+"loading.gif'/>";
 
 	    forumtext.innerHTML+='<span id="d_'+idx+'"></span><span id="geo_'+idx+'"></span>\n<span id="orig_'+idx+'"></span>[IMG]<span id="i_'+idx+'"></span>[/IMG]<span id="orig1_'+idx+'"></span>\n\n';
 
