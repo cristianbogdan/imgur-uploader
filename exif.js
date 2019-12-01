@@ -127,7 +127,8 @@ function loaded(){
 			    nfiles--;
 			    if(nfiles==0)
 				document.getElementById("cpy").disabled=false;
-			    document.getElementById('f_'+n).innerHTML=  '<font color="red">error</font>';
+			    var error= JSON.parse(http.responseText).data.error;
+			    document.getElementById('f_'+n).innerHTML=  '<font color="red">'+error+'</font>';
 			}
 		    };
 		    http.send(fd);
