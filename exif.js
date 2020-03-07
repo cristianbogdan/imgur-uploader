@@ -25,10 +25,27 @@ function loaded(){
     var filez=document.getElementById("filez");
     var photoz= document.getElementById("photoz");
     var forumtext= document.getElementById("forumtext");
+    var license = document.getElementById("ccbysa");
     var nfiles=0;
     document.getElementById("cpy").disabled=true;
+    var ccbysa_license_text = "\nImagine publicată sub licența [URL=https://creativecommons.org/licenses/by-sa/4.0/]Creative Commons Atribuire-Distribuire în Condiții identice 4.0[/URL]"
+
+    license.onchange=function(e){
+        var license_text = "";
+        if (license.checked)
+            license_text += ccbysa_license_text;
+        var cpy_state = document.getElementById("cpy").disabled;
+        document.getElementById("cpy").disabled = true;
+        for(var x = 0; x < idx; x++) {
+            document.getElementById('orig1_'+x).innerHTML= license_text;
+        }
+        document.getElementById("cpy").disabled=cpy_state;
+    };
     
     filez.onchange=function(e){
+	var license_text = "";
+	if (license.checked)
+            license_text += ccbysa_license_text;
 	nfiles+= filez.files.length;
 	document.getElementById("cpy").disabled=true;
 	for (var x = 0; x < filez.files.length; x++) {
@@ -36,7 +53,7 @@ function loaded(){
 	    photoz.innerHTML+= '<table border=0 cellpadding=0><tr valign=top><td>'+filez.files[x].name+' </td><td><textarea lang="ro" spellcheck="true" rows=2 cols=80 oninput="description(event)" id="inp_'+idx+'"></textarea><td height="50"><span id="f_'+idx+'"></span></td></tr></table><hr>';
 	    document.getElementById('f_'+idx).innerHTML= "<img id='searchimg' class='loadingimg' src='"+SCRIPT_ROOT+"loading.gif'/>";
 
-	    forumtext.innerHTML+='<span id="d_'+idx+'"></span><span id="geo_'+idx+'"></span>\n<span id="orig_'+idx+'"></span>[IMG]<span id="i_'+idx+'"></span>[/IMG]<span id="orig1_'+idx+'"></span>\n\n';
+	    forumtext.innerHTML+='<span id="d_'+idx+'"></span><span id="geo_'+idx+'"></span>\n<span id="orig_'+idx+'"></span>[IMG]<span id="i_'+idx+'"></span>[/IMG]<span id="orig1_'+idx+'">'+license_text+'</span>\n\n';
 
 	    (function(n, fidx){		
 		var fr= new FileReader();
@@ -65,7 +82,6 @@ function loaded(){
 		    
 		    //Send the proper header information along with the request
 		    http.setRequestHeader("authorization", "Client-ID 59c68e102e4b4fc");
-
 		    http.onreadystatechange = function() {//Call a function when the state changes.
 		    if(http.readyState == 4 && http.status == 200) {
 			var img=JSON.parse(http.responseText);
@@ -86,13 +102,11 @@ function loaded(){
 
                         var fd1 = new FormData();
 			
-			fd1.append("description", JSON.stringify(exif));
+			fd1.append("description", license_text + "\n" + JSON.stringify(exif));
 			http1.open("POST", url1, true);
 			
 			//Send the proper header information along with the request
 			http1.setRequestHeader("authorization", "Client-ID 59c68e102e4b4fc");
-//			http1.setRequestHeader("Cache-Control", "null");
-//			http1.setRequestHeader("X-Requested-With", "null");
 			http1.onreadystatechange = function() {//Call a function when the state changes.
 			    if(http1.readyState==4){
 			    nfiles--;
@@ -119,7 +133,7 @@ function loaded(){
 			{
 			    document.getElementById('i_'+n).innerHTML= imgRoot+'h'+imgExt;
 			    document.getElementById('orig_'+n).innerHTML= '[URL='+img.data.link+']';
-			    document.getElementById('orig1_'+n).innerHTML= '[/URL]';
+			    document.getElementById('orig1_'+n).innerHTML= '[/URL]' + license_text;
 			}
 			
 		    }
@@ -144,7 +158,6 @@ function loaded(){
 //  --url 'https://api.imgur.com/3/image/Lk8gHv2' \
 //  --header 'authorization: Client-ID 59c68e102e4b4fc'
 }
-
 
 const exifExample={
 "Orientation":3,
