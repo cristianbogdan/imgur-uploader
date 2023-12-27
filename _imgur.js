@@ -11,7 +11,7 @@ function insertHTML(){
 document.body.insertAdjacentHTML
 ( 'afterbegin',
   `<a href="https://proinfrastructura.ro"><img id="api" src="https://proinfrastructura.ro/images/logos/api/logo_api_portrait_big.png" width="50" style="float:right"/></a>
-Alege imaginile de incarcat la imgur: <input type="file" multiple id="filez"> sau "paste" mai jos.
+Alege imaginile de incarcat la imgur: <input type="file" multiple id="filez"> sau paste/drop mai jos.
   <hr>
   Optional, o descriere pt fiecare poza:
   <hr>
