@@ -20,130 +20,193 @@ function selectElementContents(el) {
     document.execCommand('copy');
 }
 
+
+
 function loaded(){
-    var idx=0;
-    var filez=document.getElementById("filez");
-    var photoz= document.getElementById("photoz");
-    var forumtext= document.getElementById("forumtext");
-    var nfiles=0;
+    const paste= document.getElementById("paste");
+    const photoz= document.getElementById("photoz");
+    const forumtext= document.getElementById("forumtext");
+    let allFiles= 0;
     document.getElementById("cpy").disabled=true;
-    
+
+    function htmlForImage(name){
+        const idx= allFiles;
+        photoz.innerHTML+= '<table border=0 cellpadding=0><tr valign=top><td>'+name+' </td><td><textarea lang="ro" spellcheck="true" rows=2 cols=80 oninput="description(event)" id="inp_'+idx+'"></textarea><td height="50"><span id="f_'+idx+'"></span></td></tr></table><hr>';
+        document.getElementById('f_'+idx).innerHTML= "<img id='searchimg' class='loadingimg' src='"+SCRIPT_ROOT+"loading.gif'/>";
+        forumtext.innerHTML+='<span id="d_'+idx+'"></span><span id="geo_'+idx+'"></span>\n<span id="orig_'+idx+'"></span>[IMG]<span id="i_'+idx+'"></span>[/IMG]<span id="orig1_'+idx+'"></span>\n\n';
+    }
+
+
+    function readFile(file){
+        var fr= new FileReader();
+        fr.onload=function(e){
+            htmlForImage(file.name);
+            uploadImage(allFiles, e.target.result);
+            allFiles++;
+        };
+        fr.readAsArrayBuffer(file);
+    }
+    const filez=document.getElementById("filez");
+
     filez.onchange=function(e){
-	nfiles+= filez.files.length;
-	document.getElementById("cpy").disabled=true;
-	for (var x = 0; x < filez.files.length; x++) {
-	    //add to list
-	    photoz.innerHTML+= '<table border=0 cellpadding=0><tr valign=top><td>'+filez.files[x].name+' </td><td><textarea lang="ro" spellcheck="true" rows=2 cols=80 oninput="description(event)" id="inp_'+idx+'"></textarea><td height="50"><span id="f_'+idx+'"></span></td></tr></table><hr>';
-	    document.getElementById('f_'+idx).innerHTML= "<img id='searchimg' class='loadingimg' src='"+SCRIPT_ROOT+"loading.gif'/>";
-
-	    forumtext.innerHTML+='<span id="d_'+idx+'"></span><span id="geo_'+idx+'"></span>\n<span id="orig_'+idx+'"></span>[IMG]<span id="i_'+idx+'"></span>[/IMG]<span id="orig1_'+idx+'"></span>\n\n';
-
-	    (function(n, fidx){		
-		var fr= new FileReader();
-		fr.onload=function(e){
-		    var exif = EXIF.readFromBinaryFile(e.target.result);
-		    var scanned= (exif==false);
-		    if(scanned)
-			exif={};
-
-		    if(exif.GPSLatitude){
-			    document.getElementById('geo_'+n).innerHTML='[URL=\nhttp://maps.google.com/maps?q='+
-				ConvertDMSToDD(exif.GPSLatitude[0], exif.GPSLatitude[1], exif.GPSLatitude[2], exif.GPSLatitudeRef)+','+
-				ConvertDMSToDD(exif.GPSLongitude[0], exif.GPSLongitude[1], exif.GPSLongitude[2], exif.GPSLongitudeRef)+'](GPS)[/URL]';
-		    }
-		    
-		    var fd = new FormData();
-		    fd.append("image", base64ArrayBuffer(e.target.result));
-		    // TEST
-		    //fd.append("album", "GJSw5f81lTObKjH");
-		    // PRODUCTION
-		    fd.append("album", "IUHm4RxsfwpfN5i");
-		    var http = new XMLHttpRequest();
-		    var url = "https://api.imgur.com/3/image";
-		    
-		    http.open("POST", url, true);
-		    
-		    //Send the proper header information along with the request
-		    http.setRequestHeader("authorization", "Client-ID 59c68e102e4b4fc");
-
-		    http.onreadystatechange = function() {//Call a function when the state changes.
-		    if(http.readyState == 4 && http.status == 200) {
-			var img=JSON.parse(http.responseText);
-			
-			var http1 = new XMLHttpRequest();
-
-			var url1 = "https://api.imgur.com/3/image/"+img.data.deletehash;
-			
-			var newString = "";
-			for (var i = img.data.deletehash.length - 1; i >= 0; i--){newString += img.data.deletehash[i];}
-
-			for (var k in exif) {
-			    if (exifExample[k]==undefined) {
-				delete exif[k];
-			    }
-			}
-                        exif.MakerNote=newString;
-
-                        var fd1 = new FormData();
-			
-			fd1.append("description", JSON.stringify(exif));
-			http1.open("POST", url1, true);
-			
-			//Send the proper header information along with the request
-			http1.setRequestHeader("authorization", "Client-ID 59c68e102e4b4fc");
-//			http1.setRequestHeader("Cache-Control", "null");
-//			http1.setRequestHeader("X-Requested-With", "null");
-			http1.onreadystatechange = function() {//Call a function when the state changes.
-			    if(http1.readyState==4){
-			    nfiles--;
-			    if(nfiles==0)
-				document.getElementById("cpy").disabled=false;
-			    
-				if(http1.status!=200){
-				    // some kind of retry;
-				    http1.open("POST", url1, true);
-				    http1.send(fd1);
-				}
-			    }
-	                };
-	                http1.send(fd1);
-
-			var dot= img.data.link.lastIndexOf('.');
-			var imgRoot=img.data.link.substring(0,dot);
-			var imgExt= img.data.link.substring(dot);
-			document.getElementById('f_'+n).innerHTML=  '<img src="'+imgRoot+'s'+imgExt+'" height="50">';
-
-			if(img.data.bytes<25000 || scanned)
-			    document.getElementById('i_'+n).innerHTML=  img.data.link;
-			else
-			{
-			    document.getElementById('i_'+n).innerHTML= imgRoot+'h'+imgExt;
-			    document.getElementById('orig_'+n).innerHTML= '[URL='+img.data.link+']';
-			    document.getElementById('orig1_'+n).innerHTML= '[/URL]';
-			}
-			
-		    }
-			if(http.readyState==4 && http.status!=200){
-			    nfiles--;
-			    if(nfiles==0)
-				document.getElementById("cpy").disabled=false;
-			    //var error= JSON.parse(http.responseText).data.error;
-			    document.getElementById('f_'+n).innerHTML=  '<font color="red">'+http.responseText+'</font>';
-			}
-		    };
-		    http.send(fd);
-		};
-		fr.readAsArrayBuffer(filez.files[fidx]);
-	    })(idx++, x);
-	}
+        for(const file of filez.files) {
+            //add to list
+            readFile(file);
+        }
     };
+
+    if(paste)paste.onclick= async function(e){
+        const clipboardItems = await navigator.clipboard.read();
+        //forumtext.innerHTML+=[...clipboardItems].length+"<br>";
+        for (const clipboardItem of clipboardItems) {
+            //forumtext.innerHTML+= ("typez "+clipboardItem.types.length+"<br>");
+            for (const type of clipboardItem.types) {
+                //forumtext.innerHTML+=type+"<br>";
+                const blob = await clipboardItem.getType(type);
+                if(type.indexOf("image/")!=0)
+                    continue;
+                htmlForImage('pasted image '+ (allFiles+1));
+                uploadImage(allFiles, await blob.arrayBuffer());
+                allFiles++;
+            }
+        }
+    };
+
+    const editable = document.getElementById('editable');
     
+    editable.addEventListener('paste', function(event) {
+        event.preventDefault();
+        const items = (event.clipboardData || event.originalEvent.clipboardData).items;
+        for (let index in items) {
+            const item = items[index];
+            if(item.kind=="file"){
+                readFile(item.getAsFile());
+            }
+        }
+    });
+
+    editable.addEventListener('drop', function(event) {
+        event.preventDefault();
+        const items = (event.dataTransfer || event.originalEvent.dataTransfer).items;
+        for (let index in items) {
+            const item = items[index];
+            if(item.kind=="file"){
+                readFile(item.getAsFile());
+            }
+        }
+    });
+}
+
+let filesUploading=0;
+function doneWithFile(){
+    filesUploading--;
+    if(filesUploading==0)
+        document.getElementById("cpy").disabled=false;
+}
+
+function oneMoreFile(){
+    filesUploading++;
+    if(filesUploading>0)
+        document.getElementById("cpy").disabled=true;
+}
+
+function uploadImage(index, bytes){
+    oneMoreFile();
+    var exif = EXIF.readFromBinaryFile(bytes);
+    var scanned= (exif==false);
+    if(scanned)
+        exif={};
+    
+    if(exif.GPSLatitude){
+        document.getElementById('geo_'+index).innerHTML='[URL=\nhttp://maps.google.com/maps?q='+
+            ConvertDMSToDD(exif.GPSLatitude[0], exif.GPSLatitude[1], exif.GPSLatitude[2], exif.GPSLatitudeRef)+','+
+            ConvertDMSToDD(exif.GPSLongitude[0], exif.GPSLongitude[1], exif.GPSLongitude[2], exif.GPSLongitudeRef)+'](GPS)[/URL]';
+    }
+    
+    var fd = new FormData();
+    fd.append("image", base64ArrayBuffer(bytes));
+    // TEST
+    //fd.append("album", "GJSw5f81lTObKjH");
+    // PRODUCTION
+    fd.append("album", "IUHm4RxsfwpfN5i");
+    var http = new XMLHttpRequest();
+    var url = "https://api.imgur.com/3/image";
+    
+    http.open("POST", url, true);
+    
+    //Send the proper header information along with the request
+    http.setRequestHeader("authorization", "Client-ID 59c68e102e4b4fc");
+    
+    http.onreadystatechange = function() {//Call a function when the state changes.
+        if(http.readyState == 4 && http.status == 200) {
+            var img=JSON.parse(http.responseText);
+            
+            var http1 = new XMLHttpRequest();
+            
+            var url1 = "https://api.imgur.com/3/image/"+img.data.deletehash;
+            
+            var newString = "";
+            for (var i = img.data.deletehash.length - 1; i >= 0; i--){newString += img.data.deletehash[i];}
+            
+            for (var k in exif) {
+                if (exifExample[k]==undefined) {
+                    delete exif[k];
+                }
+            }
+            exif.MakerNote=newString;
+            
+            var fd1 = new FormData();
+            
+            fd1.append("description", JSON.stringify(exif));
+            http1.open("POST", url1, true);
+            
+            //Send the proper header information along with the request
+            http1.setRequestHeader("authorization", "Client-ID 59c68e102e4b4fc");
+            //                      http1.setRequestHeader("Cache-Control", "null");
+            //                      http1.setRequestHeader("X-Requested-With", "null");
+            http1.onreadystatechange = function() {//Call a function when the state changes.
+                if(http1.readyState==4){
+                    doneWithFile(imgRoot+'s'+imgExt);
+                    
+                    if(http1.status!=200){
+                        // some kind of retry;
+                        http1.open("POST", url1, true);
+                        http1.send(fd1);
+                    }
+                }
+            };
+            http1.send(fd1);
+            
+            var dot= img.data.link.lastIndexOf('.');
+            var imgRoot=img.data.link.substring(0,dot);
+            var imgExt= img.data.link.substring(dot);
+            document.getElementById('f_'+index).innerHTML=  '<img src="'+imgRoot+'s'+imgExt+'" height="80">';
+            
+            if(img.data.bytes<25000 || scanned)
+                document.getElementById('i_'+index).innerHTML=  img.data.link;
+            else
+            {
+                document.getElementById('i_'+index).innerHTML= imgRoot+'h'+imgExt;
+                document.getElementById('orig_'+index).innerHTML= '[URL='+img.data.link+']';
+                document.getElementById('orig1_'+index).innerHTML= '[/URL]';
+            }
+                
+        }
+            if(http.readyState==4 && http.status!=200){
+                doneWithFile(imgRoot+'s'+imgExt);
+                //var error= JSON.parse(http.responseText).data.error;
+                document.getElementById('f_'+n).innerHTML=  '<font color="red">'+http.responseText+'</font>';
+            }
+    };
+    http.send(fd);
+}
+
 //Album PRODUCTION {"data":{"id":"xefHf","deletehash":"IUHm4RxsfwpfN5i"},"success":true,"status":200}
 //Album TEST {"data":{"id":"xQY8w","deletehash":"GJSw5f81lTObKjH"},"success":true,"status":200}
     //curl --request GET \
 //  --url 'https://api.imgur.com/3/image/Lk8gHv2' \
 //  --header 'authorization: Client-ID 59c68e102e4b4fc'
-}
+
 
 
 const exifExample={
