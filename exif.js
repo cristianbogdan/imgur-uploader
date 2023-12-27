@@ -17,6 +17,7 @@ function selectElementContents(el) {
     var sel = window.getSelection();
     sel.removeAllRanges();
     sel.addRange(range);
+    document.getElementById(el).addEventListener('copy', function(e){ e.stopPropagation(); });
     document.execCommand('copy');
 }
 
@@ -29,8 +30,7 @@ function loaded(){
     let allFiles= 0;
     document.getElementById("cpy").disabled=true;
 
-    function htmlForImage(name){
-        const idx= allFiles;
+    function htmlForImage(idx, name){
         photoz.innerHTML+= '<table border=0 cellpadding=0><tr valign=top><td>'+name+' </td><td><textarea lang="ro" spellcheck="true" rows=2 cols=80 oninput="description(event)" id="inp_'+idx+'"></textarea><td height="50"><span id="f_'+idx+'"></span></td></tr></table><hr>';
         document.getElementById('f_'+idx).innerHTML= "<img id='searchimg' class='loadingimg' src='"+SCRIPT_ROOT+"loading.gif'/>";
         forumtext.innerHTML+='<span id="d_'+idx+'"></span><span id="geo_'+idx+'"></span>\n<span id="orig_'+idx+'"></span>[IMG]<span id="i_'+idx+'"></span>[/IMG]<span id="orig1_'+idx+'"></span>\n\n';
@@ -38,11 +38,11 @@ function loaded(){
 
 
     function readFile(file){
+        const number=allFiles++;
         var fr= new FileReader();
         fr.onload=function(e){
-            htmlForImage(file.name);
-            uploadImage(allFiles, e.target.result);
-            allFiles++;
+            htmlForImage(number, file.name);
+            uploadImage(number, e.target.result);
         };
         fr.readAsArrayBuffer(file);
     }
@@ -55,46 +55,54 @@ function loaded(){
         }
     };
 
-    if(paste)paste.onclick= async function(e){
-        const clipboardItems = await navigator.clipboard.read();
-        //forumtext.innerHTML+=[...clipboardItems].length+"<br>";
-        for (const clipboardItem of clipboardItems) {
-            //forumtext.innerHTML+= ("typez "+clipboardItem.types.length+"<br>");
-            for (const type of clipboardItem.types) {
-                //forumtext.innerHTML+=type+"<br>";
-                const blob = await clipboardItem.getType(type);
-                if(type.indexOf("image/")!=0)
-                    continue;
-                htmlForImage('pasted image '+ (allFiles+1));
-                uploadImage(allFiles, await blob.arrayBuffer());
-                allFiles++;
+    // not used for now:
+    async function pasteUsingClipboardAPI(e){
+        try{
+            
+            const clipboardItems = await navigator.clipboard.read();
+            //forumtext.innerHTML+=[...clipboardItems].length+"<br>";
+            for (const clipboardItem of clipboardItems) {
+                //forumtext.innerHTML+= ("typez "+clipboardItem.types.length+"<br>");
+                for (const type of clipboardItem.types) {
+                    //forumtext.innerHTML+=type+"<br>";
+                    const blob = await clipboardItem.getType(type);
+                    if(type.indexOf("image/")!=0)
+                        continue;
+                    htmlForImage('pasted image '+ (allFiles+1));
+                    uploadImage(allFiles, await blob.arrayBuffer());
+                    allFiles++;
+                }
             }
+        }catch(exc){
+            console.error(exc);
         }
     };
+    //if(paste)paste.onclick= pasteUsingClipboardAPI;
+
+    //window.addEventListener('paste', pasteUsingClipboardAPI);
 
     const editable = document.getElementById('editable');
-    
-    editable.addEventListener('paste', function(event) {
-        event.preventDefault();
-        const items = (event.clipboardData || event.originalEvent.clipboardData).items;
-        for (let index in items) {
-            const item = items[index];
+
+    function readItems(items){
+        for (const item of items) {
             if(item.kind=="file"){
                 readFile(item.getAsFile());
             }
         }
+    }
+    editable.addEventListener('paste', function(event) {
+        event.preventDefault();
+        event.stopPropagation();
+        readItems( (event.clipboardData || event.originalEvent.clipboardData).items);
+
     });
 
     editable.addEventListener('drop', function(event) {
         event.preventDefault();
-        const items = (event.dataTransfer || event.originalEvent.dataTransfer).items;
-        for (let index in items) {
-            const item = items[index];
-            if(item.kind=="file"){
-                readFile(item.getAsFile());
-            }
-        }
+        readItems((event.dataTransfer || event.originalEvent.dataTransfer).items);
     });
+
+    window.addEventListener('copy', function(){selectElementContents('forumtext-all');});
 }
 
 let filesUploading=0;
@@ -195,7 +203,7 @@ function uploadImage(index, bytes){
             if(http.readyState==4 && http.status!=200){
                 doneWithFile(imgRoot+'s'+imgExt);
                 //var error= JSON.parse(http.responseText).data.error;
-                document.getElementById('f_'+n).innerHTML=  '<font color="red">'+http.responseText+'</font>';
+                document.getElementById('f_'+index).innerHTML=  '<font color="red">'+http.responseText+'</font>';
             }
     };
     http.send(fd);
