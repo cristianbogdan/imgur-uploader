@@ -21,7 +21,7 @@ Cand toate pozele sunt vizibile mai sus, selecteaza textul si copiaza, sau apasa
   <pre id="forumtext-all" style="background:lightgrey" onClick="selectElementContents(\'forumtext-all\')"><span id="forumtext"></span>
 [size=8pt]Powered by [URL=https://proinfrastructura.ro/poze.html]API/PUM imgur uploader[/URL][/size]</pre>
 
-<div contenteditable="true" id="editable" style="height: 100px; border: 1px solid #ccc;">Faceti "paste" sau "drop" cu poze aici!</div>
+<div contenteditable="true" id="editable" style="height: 100px; border: 1px solid #ccc;" autofocus>Faceti "paste" sau "drop" cu poze aici!</div>
 
 <hr>Atentie, se vor salva la imgur <a href="http://forum.peundemerg.ro/index.php?topic=176.msg190425#msg190425">informatii 
 fotografice EXIF, inclusiv pozitia GPS</a>! 
