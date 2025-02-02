@@ -178,8 +178,8 @@ function uploadImage(index, bytes){
                     
                     if(http1.status!=200){
                         // some kind of retry;
-                        http1.open("POST", url1, true);
-                        http1.send(fd1);
+                    //    http1.open("POST", url1, true);
+                    //    http1.send(fd1);
                     }
                 }
             };
@@ -189,15 +189,16 @@ function uploadImage(index, bytes){
             var imgRoot=img.data.link.substring(0,dot);
             var imgExt= img.data.link.substring(dot);
             document.getElementById('f_'+index).innerHTML=  '<img src="'+imgRoot+'s'+imgExt+'" height="80">';
-            
-            if(img.data.bytes<25000 || scanned)
+
+	    /*
+            if(img.data.bytes<25000 || scanned) */
                 document.getElementById('i_'+index).innerHTML=  img.data.link;
-            else
+            /*else
             {
                 document.getElementById('i_'+index).innerHTML= imgRoot+'h'+imgExt;
                 document.getElementById('orig_'+index).innerHTML= '[URL='+img.data.link+']';
                 document.getElementById('orig1_'+index).innerHTML= '[/URL]';
-            }
+            }*/
                 
         }
             if(http.readyState==4 && http.status!=200){
